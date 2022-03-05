@@ -16,11 +16,10 @@
 // under the License.
 
 use std::any::Any;
-use std::convert::TryInto;
+
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::marker::Send;
-use std::pin::Pin;
+
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -38,8 +37,7 @@ use datafusion::error::{DataFusionError, Result};
 use datafusion::logical_plan::LogicalPlan;
 use datafusion::physical_plan::expressions::PhysicalSortExpr;
 use datafusion::physical_plan::{
-    DisplayFormatType, ExecutionPlan, Partitioning, RecordBatchStream,
-    SendableRecordBatchStream, Statistics,
+    DisplayFormatType, ExecutionPlan, Partitioning, SendableRecordBatchStream, Statistics,
 };
 
 use crate::serde::{AsLogicalPlan, DefaultLogicalExtensionCodec, LogicalExtensionCodec};
@@ -289,7 +287,7 @@ async fn fetch_partition(
         BallistaClient::try_new(metadata.host.as_str(), metadata.port as u16)
             .await
             .map_err(|e| DataFusionError::Execution(format!("{:?}", e)))?;
-    Ok(ballista_client
+    ballista_client
         .fetch_partition(
             &partition_id.job_id,
             partition_id.stage_id as usize,
@@ -297,5 +295,5 @@ async fn fetch_partition(
             &location.path,
         )
         .await
-        .map_err(|e| DataFusionError::Execution(format!("{:?}", e)))?)
+        .map_err(|e| DataFusionError::Execution(format!("{:?}", e)))
 }
